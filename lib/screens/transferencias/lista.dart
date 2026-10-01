@@ -4,7 +4,12 @@ import 'formulario.dart';
 import 'package:intl/intl.dart';
 
 class ListaTransferencias extends StatefulWidget {
-  final List<Transferencia> _transferencias = [];
+  ListaTransferencias({super.key});
+
+  final List<PagamentoVaga> _transferencias = [
+    PagamentoVaga(12.00, 2),
+    PagamentoVaga(18.50, 5),
+  ];
 
   @override
   State<StatefulWidget> createState() {
@@ -13,12 +18,13 @@ class ListaTransferencias extends StatefulWidget {
 }
 
 class ListaTransferenciaState extends State<ListaTransferencias> {
-  static const _tituloAppBar = "Transferências";
+  static const _tituloAppBar = "Estacionamento";
 
-  void _atualiza(Transferencia? transferenciaRecebida) {    
-    if (transferenciaRecebida != null) {
+  Future<void> _atualiza(PagamentoVaga? pagamentoRecebido) async {
+    if (pagamentoRecebido != null) {
+      await Future.delayed(const Duration(seconds: 1));
       setState(() {
-        widget._transferencias.add(transferenciaRecebida);
+        widget._transferencias.add(pagamentoRecebido);
       });
     }
   }
@@ -26,7 +32,7 @@ class ListaTransferenciaState extends State<ListaTransferencias> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_tituloAppBar)),
+      appBar: AppBar(title: const Text(_tituloAppBar), centerTitle: true),
       body: ListView.builder(
         itemCount: widget._transferencias.length,
         itemBuilder: (context, indice) {
@@ -37,34 +43,35 @@ class ListaTransferenciaState extends State<ListaTransferencias> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           debugPrint("Botão + pressionado");
-          Navigator.push(context,
+          Navigator.push(
+            context,
             MaterialPageRoute(
-              builder: (context){
-                return FormularioTransferencia();
+              builder: (context) {
+                return const FormularioTransferencia();
               },
             ),
-          ).then((transferenciaRecebida) => _atualiza(transferenciaRecebida));         
+          ).then((transferenciaRecebida) => _atualiza(transferenciaRecebida));
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-  }  
+  }
 }
 
 class ItemTransferencia extends StatelessWidget {
-  final Transferencia _transferencia;
+  final PagamentoVaga _pagamento;
 
-  ItemTransferencia(this._transferencia);
+  const ItemTransferencia(this._pagamento, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat formato = NumberFormat.simpleCurrency();
+    final formato = NumberFormat.simpleCurrency(locale: 'pt_BR');
     return Card(
       child: ListTile(
-        leading: Icon(Icons.monetization_on),
-        title: Text(formato.format(_transferencia.valor).toString()),
-        subtitle: Text(_transferencia.numeroConta.toString()),
+        leading: const Icon(Icons.local_parking),
+        title: Text(formato.format(_pagamento.valor)),
+        subtitle: Text('Vaga ${_pagamento.numeroVaga}'),
       ),
     );
   }

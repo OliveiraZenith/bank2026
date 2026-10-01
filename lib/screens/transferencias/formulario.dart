@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../components/editor.dart';
 import '../../models/transferencia.dart';
 
-
 class FormularioTransferencia extends StatefulWidget {
+  const FormularioTransferencia({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return FormularioTransferenciaState();
@@ -11,41 +12,46 @@ class FormularioTransferencia extends StatefulWidget {
 }
 
 class FormularioTransferenciaState extends State<FormularioTransferencia> {
-  final TextEditingController _controladorCampoNumeroConta =
+  final TextEditingController _controladorCampoNumeroVaga =
       TextEditingController();
   final TextEditingController _controladorCampoValor = TextEditingController();
 
-  static const _tituloAppBar = 'Criando transferência';
-  static const _rotuloCampoValor = 'Valor';
+  static const _tituloAppBar = 'Novo estacionamento';
+  static const _rotuloCampoValor = 'Valor do estacionamento';
   static const _dicaCampoValor = '0,00';
 
-  static const _rotuloCampoNumeroConta = 'Número da conta';
-  static const _dicaCampoNumeroConta = '0000';
+  static const _rotuloCampoNumeroVaga = 'Número da vaga';
+  static const _dicaCampoNumeroVaga = 'Ex.: 12';
   static const _textoBotaoConfirmar = 'Confirmar';
+
+  @override
+  void dispose() {
+    _controladorCampoNumeroVaga.dispose();
+    _controladorCampoValor.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _tituloAppBar,        
-        ),
-        
-      ),
+      appBar: AppBar(title: Text(_tituloAppBar)),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Editor(
-              controlador: _controladorCampoNumeroConta,
-              rotulo: _rotuloCampoNumeroConta,
-              dica: _dicaCampoNumeroConta,
+              controlador: _controladorCampoNumeroVaga,
+              rotulo: _rotuloCampoNumeroVaga,
+              dica: _dicaCampoNumeroVaga,
+              icone: Icons.local_parking,
+              tipoTeclado: TextInputType.number,
             ),
 
             Editor(
               controlador: _controladorCampoValor,
               rotulo: _rotuloCampoValor,
               dica: _dicaCampoValor,
-              icone: Icons.monetization_on,
+              icone: Icons.payments_outlined,
+              tipoTeclado: const TextInputType.numberWithOptions(decimal: true),
             ),
 
             ElevatedButton(
@@ -53,7 +59,7 @@ class FormularioTransferenciaState extends State<FormularioTransferencia> {
                 debugPrint("Clicou aqui...");
                 _criaTransferencia(
                   context,
-                  _controladorCampoNumeroConta,
+                  _controladorCampoNumeroVaga,
                   _controladorCampoValor,
                 );
               },
@@ -68,15 +74,20 @@ class FormularioTransferenciaState extends State<FormularioTransferencia> {
 
 void _criaTransferencia(
   BuildContext context,
-  TextEditingController controladorCampoNumeroConta,
+  TextEditingController controladorCampoNumeroVaga,
   TextEditingController controladorCampoValor,
 ) {
-  final int? numeroConta = int.tryParse(controladorCampoNumeroConta.text);
-  final double? valor = double.tryParse(controladorCampoValor.text);
+  final int? numeroVaga = int.tryParse(controladorCampoNumeroVaga.text.trim());
+  final double? valor = double.tryParse(
+    controladorCampoValor.text.trim().replaceAll(',', '.'),
+  );
 
-  if (numeroConta != null && valor != null) {
-    final transferenciaCriada = Transferencia(valor, numeroConta);
-    debugPrint('$transferenciaCriada'); // Teste de saída no console
-    Navigator.pop(context, transferenciaCriada);
+  if (numeroVaga == null || numeroVaga <= 0 || valor == null || valor <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Informe uma vaga e um valor válidos.')),
+    );
+    return;
   }
+
+  Navigator.pop(context, PagamentoVaga(valor, numeroVaga));
 }

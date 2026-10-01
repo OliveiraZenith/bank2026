@@ -11,20 +11,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bank/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(BankApp());
+  testWidgets('exibe vagas iniciais e adiciona um estacionamento', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const BankApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Estacionamento'), findsOneWidget);
+    expect(find.text('Vaga 2'), findsOneWidget);
+    expect(find.text('Vaga 5'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(0), '12');
+    await tester.enterText(find.byType(TextField).at(1), '25,50');
+    await tester.tap(find.text('Confirmar'));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Vaga 12'), findsOneWidget);
   });
 }
